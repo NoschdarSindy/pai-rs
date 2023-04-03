@@ -1,0 +1,18 @@
+[package]
+name = "pairs"
+version = "0.1.0"
+authors = ["Your Name <student@informatik.hu-berlin.de>", "Your Partner <partner@informatik.hu-berlin.de"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+[profile.release]
+opt-level = "z"
+strip = true
