@@ -10,31 +10,53 @@
       }
 
       .field {
-        text-decoration: none;
         text-align: center;
-        width: 1.2rem;
-        height: 1.2rem;
-        line-height: 1.2rem;
+        cursor: pointer;
       }
+
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="settings">
+        <p>Number of players: </p>
+        <input id="nPlayers" type="number" min="1" max="8" step="1" value="1"/>
+        <p>Field Size:</p>
+        <input id="fieldSize" type="number" min="2" max="16" step="2" value="4"/>
+        <button id="startBtn">Start</button>
+      </div>
+    </div>
+    <br>
+    Points: <span id="points"></span>
 
     <script type="module">
       import init, {
         getState,
         openField,
         closeAll,
+        initGame,
+        getPoints
       } from "./pkg/pairs.js";
+
+
+      await init();
 
       let shouldAbort = false;
 
-      async function main() {
-        await init();
-
+      function start() {
         render();
       }
+
+      document.getElementById("startBtn").addEventListener("click", (e) => {
+        e.preventDefault();
+        let nPlayers = document.getElementById("nPlayers").value;
+        let fieldSize = document.getElementById("fieldSize").value;
+        console.log("PlayersCount: ", parseInt(nPlayers));
+        console.log("FieldSize: ", parseInt(fieldSize));
+
+        initGame(parseInt(nPlayers), parseInt(fieldSize));
+        start();
+      })
 
       function render() {
         let root = document.getElementById("root");
@@ -45,13 +67,16 @@
           .map((row) => row.trim().split(/\s+/));
         root.style.display = "inline-grid";
         root.style.gridTemplate = `repeat(${data.length}, auto) / repeat(${data[0].length}, auto)`;
+        root.style.gap = `0.1rem`;
 
         for (let y = 0; y < data.length; y++) {
           for (let x = 0; x < data[y].length; x++) {
-            let element = document.createElement("a");
+            let element = document.createElement("div");
             element.classList.add("field");
-            element.href = "#";
-            element.innerText = data[y][x];
+            element.style.fontSize = `${data.length * (-2/3) + 10}rem`;
+            element.style.lineHeight = `${data.length * (-2/3) + 10}rem`;
+            
+            element.innerHTML = data[y][x];
 
             element.addEventListener("click", (evt) => {
               if (shouldAbort) {
@@ -74,9 +99,11 @@
             root.appendChild(element);
           }
         }
-      }
 
-      main();
+        let points = getPoints();
+        let pointsContainer = document.getElementById("points");
+        pointsContainer.innerHTML = points
+      }
     </script>
   </body>
 </html>
