@@ -25,7 +25,10 @@
       import init, {
         getState,
         openField,
+        closeAll,
       } from "./pkg/pairs.js";
+
+      let shouldAbort = false;
 
       async function main() {
         await init();
@@ -51,9 +54,21 @@
             element.innerText = data[y][x];
 
             element.addEventListener("click", (evt) => {
+              if (shouldAbort) {
+                return;
+              }
+
               evt.preventDefault();
-              openField(x, y);
+              let isMismatch = openField(x, y);
               render();
+              if (isMismatch) {
+                shouldAbort = true;
+                setTimeout(() => {
+                  shouldAbort = false;
+                  closeAll();
+                  render();
+                }, 1000);
+              }
             });
 
             root.appendChild(element);
