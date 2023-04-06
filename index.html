@@ -14,20 +14,52 @@
         cursor: pointer;
       }
 
+      body {
+       text-align: center;
+      }
+      body > *, #root > * {
+        margin: auto;
+        text-align: center;
+      }
+
+      td:first-child {
+        text-align: right;
+      }
+
+      input {
+        display: flex;
+        font-size: 1em;
+        width: 3em;
+      }
+
+      #startBtn {
+        margin-top: 0.2em;
+        font-size: 1em;
+        border-radius: 10%;
+      }
+      #startBtn:hover {
+        cursor: pointer;
+        border-width: 3px;
+      }
     </style>
   </head>
   <body>
     <div id="root">
-      <div id="settings">
-        <p>Number of players: </p>
-        <input id="nPlayers" type="number" min="1" max="8" step="1" value="1"/>
-        <p>Field Size:</p>
-        <input id="fieldSize" type="number" min="2" max="16" step="2" value="8"/>
-        <button id="startBtn">Start</button>
-      </div>
+      <h1>pai.rs</h1>
+      <table id="settings">
+        <tr>
+          <td>Number of players:&nbsp;</td>
+          <td>
+            <input id="nPlayers" type="number" min="1" max="8" step="1" value="1"/></td>
+        </tr>
+        <tr>
+          <td>Field size:&nbsp;</td>
+          <td><input id="fieldSize" type="number" min="2" max="16" step="2" value="8"/></td>
+        </tr>
+      </table>
+      <button id="startBtn">Start</button>
     </div>
-    <br>
-    Points: <span id="points"></span>
+    <br/><span id="points"></span>
 
     <script type="module">
       import init, {
@@ -37,7 +69,6 @@
         initGame,
         getPoints
       } from "./pkg/pairs.js";
-
 
       await init();
 
@@ -65,9 +96,11 @@
         let data = getState()
           .split("\n")
           .map((row) => row.trim().split(/\s+/));
-        root.style.display = "inline-grid";
+        root.style.display = "grid";
         root.style.gridTemplate = `repeat(${data.length}, auto) / repeat(${data[0].length}, auto)`;
-        root.style.gap = `0.1rem`;
+        root.style.gap = "1em 0";
+        root.style.justifyContent = "center";
+        root.style.alignContent = "space-center";
 
         for (let y = 0; y < data.length; y++) {
           for (let x = 0; x < data[y].length; x++) {
@@ -102,7 +135,7 @@
 
         let points = getPoints();
         let pointsContainer = document.getElementById("points");
-        pointsContainer.innerHTML = points
+        pointsContainer.innerHTML = `Points: ${points}`
       }
     </script>
   </body>
