@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 
 thread_local! {
-	static PAIRS: RefCell<Pairs> = RefCell::new(Pairs::new(4, 4));
+	static PAIRS: RefCell<Pairs> = RefCell::new(Pairs::new(16, 16));
 }
 
 
@@ -35,5 +35,21 @@ pub fn open_field(y: usize, x: usize) -> bool {
 pub fn close_all() {
 	PAIRS.with(|pairs| {
 		pairs.borrow_mut().close_all();
+	})
+}
+
+
+#[wasm_bindgen(js_name = initGame)]
+pub fn init_game(player_count: usize, field_size: usize) {
+	PAIRS.with(|pairs| {
+		pairs.borrow_mut().create(player_count, field_size);
+	})
+}
+
+
+#[wasm_bindgen(js_name = getPoints)]
+pub fn get_points() -> String {
+	PAIRS.with(|pairs| {
+		pairs.borrow_mut().get_player_points()
 	})
 }

@@ -11,7 +11,11 @@ struct Vec2<T> {
 }
 type Position = Vec2<usize>;
 
-#[derive(Clone, Debug)]
+
+const PLAYER_COLORS: [char; 8] = ['🟥', '🟦', '🆒', '🟧', '🟪', '🟨', '🟩', '🟫'];
+
+
+#[derive(Clone, Debug)] 
 struct Field {
     symbol: usize,
     open: bool,
@@ -23,6 +27,9 @@ pub struct Pairs {
     rows: usize,
     open: (Option<Position>, Option<Position>),
     field: Vec2D<Option<Field>>,
+    player_count: usize,
+    active_player: usize,
+    player_points: Vec<usize>,
 }
 
 impl Pairs {
@@ -35,8 +42,21 @@ impl Pairs {
             rows,
             open: (None, None),
             field: Pairs::init_random_field(cols, rows),
+            player_count: 1,
+            active_player: 0,
+            player_points: Vec::new(),
         }
     }
+
+
+    pub fn create(&mut self, player_count: usize, field_size: usize) {
+        self.cols = field_size;
+        self.rows = field_size;
+        self.player_count = player_count;
+        self.field = Pairs::init_random_field(field_size, field_size);
+        self.player_points = vec![0; player_count];
+    }
+
 
     fn init_random_field(cols: usize, rows: usize) -> Vec2D<Option<Field>> {
         let mut pairs = Vec::new();
@@ -56,6 +76,7 @@ impl Pairs {
         }
         field
     }
+
 
     pub fn open(&mut self, x: usize, y: usize) -> bool {
 
@@ -85,9 +106,11 @@ impl Pairs {
                 let first_symbol = self.field[first.x][first.y].as_ref().unwrap().symbol;
                 let second_symbol = self.field[x][y].as_ref().unwrap().symbol;
                 if first_symbol == second_symbol {
+                    self.player_points[self.active_player] += 1;
                     self.open = (None, None);
                 } else {
                     self.open.1 = Some(Position { x, y });
+                    self.active_player = (self.active_player + 1) % self.player_count;
                     return true;
                 }
             }
@@ -115,7 +138,17 @@ impl Pairs {
     }
 
 
+    pub fn get_player_points(&mut self) -> String { 
+        let mut final_string = String::new();
+        for (index, points) in self.player_points.iter().enumerate() {
+            final_string += &format!("{}: {}   ", PLAYER_COLORS[index], points);
+        }
+        final_string
+    }
+
+
 }
+
 
 impl Display for Pairs {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -128,7 +161,7 @@ impl Display for Pairs {
                             f.write_str(&format!("{} ", symbol));
                         }
                         false => {
-                            f.write_str("🟪 ");
+                            f.write_str(&format!("{} ", PLAYER_COLORS[self.active_player]));
                         }
                     }
                 } else {
