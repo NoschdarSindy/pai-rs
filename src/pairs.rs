@@ -57,15 +57,21 @@ impl Pairs {
         field
     }
 
-    pub fn open(&mut self, x: usize, y: usize) {
-        if let None = self.field[x][y] {
-            return;
+    pub fn open(&mut self, x: usize, y: usize) -> bool {
+
+        if let Some(field) = &mut self.field[x][y] {
+            // Karte aufdecken, falls sie es noch nicht ist
+            field.open = match field.open {
+                true => { return false; },
+                false => true,
+            };
+        } else {
+            return false;
         }
 
         match &self.open {
             // Bisher ist noch kein Feld aufgedeckt
             (None, None) => {
-                self.field[x][y].as_mut().unwrap().open = true;
                 self.open.0 = Some(Position { x, y });
             }
 
@@ -73,18 +79,16 @@ impl Pairs {
             (Some(first), None) => {
                 // Die gleiche Karte wurde ausgewählt
                 if first.x == x && first.y == y {
-                    return;
+                    return false;
                 }
                 // Wurde ein Paar gefunden?
                 let first_symbol = self.field[first.x][first.y].as_ref().unwrap().symbol;
                 let second_symbol = self.field[x][y].as_ref().unwrap().symbol;
                 if first_symbol == second_symbol {
-                    self.field[first.x][first.y] = None;
-                    self.field[x][y] = None;
                     self.open = (None, None);
                 } else {
-                    self.field[x][y].as_mut().unwrap().open = true;
                     self.open.1 = Some(Position { x, y });
+                    return true;
                 }
             }
 
@@ -93,13 +97,24 @@ impl Pairs {
                 // Die alten Karten wieder verdecken
                 self.field[first.x][first.y].as_mut().unwrap().open = false;
                 self.field[second.x][second.y].as_mut().unwrap().open = false;
-                // Die neue Karte aufdecken
-                self.field[x][y].as_mut().unwrap().open = true;
+                // Die neue Karte als aufgedeckt markieren
                 self.open = (Some(Position { x, y }), None);
             }
             _ => {}
         }
+        return false;
     }
+
+
+    pub fn close_all(&mut self) {
+        if let (Some(first), Some(second)) = &self.open {
+            self.field[first.x][first.y].as_mut().unwrap().open = false;
+            self.field[second.x][second.y].as_mut().unwrap().open = false;
+            self.open = (None, None);
+        }
+    }
+
+
 }
 
 impl Display for Pairs {
