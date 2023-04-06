@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 
 thread_local! {
-	static PAIRS: RefCell<Pairs> = RefCell::new(Pairs::new(16, 16));
+	static PAIRS: RefCell<Pairs> = RefCell::new(Pairs::default());
 }
 
 
