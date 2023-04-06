@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 use std::fmt::Display;
 
 type Vec2D<T> = Vec<Vec<T>>;
@@ -76,7 +74,7 @@ impl Pairs {
                     return true;
                 }
             }
-            (Some(first), Some(second)) => {
+            (Some(_), Some(_)) => {
                 self.close_all();
                 self.open.0 = Some(Position { x, y });
             }
@@ -111,9 +109,9 @@ impl Display for Pairs {
                     true => char::from_u32(128053 + field.symbol as u32).unwrap(),
                     false => PLAYER_COLORS[self.active_player],
                 };
-                f.write_str(&format!("{} ", symbol));
+                f.write_str(&format!("{} ", symbol)).unwrap();
             }
-            f.write_str("\n");
+            f.write_str("\n").unwrap();
         }
         Ok(())
     }
