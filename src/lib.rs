@@ -1,55 +1,131 @@
-mod pairs;
-
-use pairs::*;
-use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 
-thread_local! {
-	static PAIRS: RefCell<Pairs> = RefCell::new(Pairs::default());
+type Vec2D<T> = Vec<Vec<T>>;
+
+#[derive(Clone, Debug)]
+struct Vec2<T> {
+    x: T,
+    y: T,
+}
+
+type Position = Vec2<usize>;
+
+const PLAYER_COLORS: [char; 8] = ['🟥', '🟦', '🆒', '🟧', '🟪', '🟨', '🟩', '🟫'];
+
+#[derive(Clone, Debug, Default)]
+struct Field {
+    symbol: usize,
+    open: bool,
 }
 
 
-#[wasm_bindgen(js_name = greet)]
-pub fn greet() -> String {
-	format!("Hallo")
+#[wasm_bindgen]
+#[derive(Debug, Default)]
+pub struct Pairs {
+    open: (Option<Position>, Option<Position>),
+    field: Vec2D<Field>,
+    field_size: usize,
+    active_player: usize,
+    player_points: Vec<usize>,
 }
 
+#[wasm_bindgen]
+impl Pairs {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self::default()
+    }
 
-#[wasm_bindgen(js_name = getState)]
-pub fn get_pairs() -> String {
-	PAIRS.with(|pairs| {
-		pairs.borrow().to_string()
-	})
-}
+    #[wasm_bindgen(js_name = createGrid)]
+    pub fn create(&mut self, player_count: usize, field_size: usize) {
+        self.field_size = field_size;
+        self.field = Pairs::init_random_field(field_size);
+        self.player_points = vec![0; player_count];
+    }
 
+    fn init_random_field(field_size: usize) -> Vec2D<Field> {
+        let mut pairs = Vec::new();
+        for i in 0..((field_size * field_size) / 2) {
+            let field = Field {
+                symbol: i,
+                open: false,
+            };
+            pairs.push(field.clone());
+            pairs.push(field);
+        }
+        fastrand::shuffle(&mut pairs);
 
-#[wasm_bindgen(js_name = openField)]
-pub fn open_field(y: usize, x: usize) -> bool {
-	PAIRS.with(|pairs| {
-		pairs.borrow_mut().open(x, y)
-	})
-}
+        let mut field: Vec2D<Field> = vec![vec![Field::default(); field_size]; field_size];
+        for f in field.iter_mut().flatten() {
+            *f = pairs.pop().unwrap();
+        }
+        field
+    }
 
+    #[wasm_bindgen(js_name = openField)]
+    pub fn open(&mut self, x: usize, y: usize) -> bool {
+        let field = &mut self.field[x][y];
 
-#[wasm_bindgen(js_name = closeAll)]
-pub fn close_all() {
-	PAIRS.with(|pairs| {
-		pairs.borrow_mut().close_all();
-	})
-}
+        field.open = match field.open {
+            true => {
+                return false;
+            }
+            false => true,
+        };
 
+        match &self.open {
+            (None, None) => self.open.0 = Some(Position { x, y }),
+            (Some(other), None) => {
+                if field.symbol == self.field[other.x][other.y].symbol {
+                    self.player_points[self.active_player] += 1;
+                    self.open = (None, None);
+                } else {
+                    self.open.1 = Some(Position { x, y });
+                    self.active_player = (self.active_player + 1) % self.player_points.len();
+                    return true;
+                }
+            }
+            (Some(_), Some(_)) => {
+                self.close_all();
+                self.open.0 = Some(Position { x, y });
+            }
+            _ => {}
+        }
+        return false;
+    }
 
-#[wasm_bindgen(js_name = initGame)]
-pub fn init_game(player_count: usize, field_size: usize) {
-	PAIRS.with(|pairs| {
-		pairs.borrow_mut().create(player_count, field_size);
-	})
-}
+    #[wasm_bindgen(js_name = closeFields)]
+    pub fn close_all(&mut self) {
+        if let (Some(first), Some(second)) = &self.open {
+            self.field[first.x][first.y].open = false;
+            self.field[second.x][second.y].open = false;
+            self.open = (None, None);
+        }
+    }
 
+    #[wasm_bindgen(js_name = getPoints)]
+    pub fn get_player_points(&self) -> String {
+        let mut final_string = String::new();
+        for (index, points) in self.player_points.iter().enumerate() {
+            final_string += &format!("{}: {}   ", PLAYER_COLORS[index], points);
+        }
+        final_string
+    }
 
-#[wasm_bindgen(js_name = getPoints)]
-pub fn get_points() -> String {
-	PAIRS.with(|pairs| {
-		pairs.borrow_mut().get_player_points()
-	})
+    #[wasm_bindgen(js_name = getState)]
+    pub fn get_state(&self) -> String {
+        let mut state = String::new();
+        for x in 0..self.field_size {
+            for y in 0..self.field_size {
+                let field = &self.field[x][y];
+                let symbol = match field.open {
+                    true => char::from_u32(128053 + field.symbol as u32).unwrap(),
+                    false => PLAYER_COLORS[self.active_player],
+                };
+                state += &format!("{} ", symbol);
+            }
+            state += "\n";
+        }
+        state
+    }
 }
