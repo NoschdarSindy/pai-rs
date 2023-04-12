@@ -1,4 +1,5 @@
 mod pairs;
+mod pairs_tests;
 
 use pairs::*;
 use std::cell::RefCell;
@@ -50,6 +51,6 @@ pub fn init_game(player_count: usize, field_size: usize) {
 #[wasm_bindgen(js_name = getPoints)]
 pub fn get_points() -> String {
 	PAIRS.with(|pairs| {
-		pairs.borrow_mut().get_player_points()
+		pairs.borrow_mut().player_points_to_str()
 	})
 }
