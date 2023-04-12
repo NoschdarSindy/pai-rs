@@ -62,30 +62,23 @@
     <br/><span id="points"></span>
 
     <script type="module">
-      import init, {
-        getState,
-        openField,
-        closeAll,
-        initGame,
-        getPoints
-      } from "./pkg/pairs.js";
+      import init, { Pairs } from "./pkg/pairs.js";
 
       await init();
 
       let shouldAbort = false;
+      let pairs;
 
       function start() {
         render();
       }
 
+
       document.getElementById("startBtn").addEventListener("click", (e) => {
         e.preventDefault();
         let nPlayers = document.getElementById("nPlayers").value;
         let fieldSize = document.getElementById("fieldSize").value;
-        console.log("PlayersCount: ", parseInt(nPlayers));
-        console.log("FieldSize: ", parseInt(fieldSize));
-
-        initGame(parseInt(nPlayers), parseInt(fieldSize));
+        pairs = new Pairs(parseInt(nPlayers), parseInt(fieldSize));
         start();
       })
 
@@ -93,7 +86,7 @@
         let root = document.getElementById("root");
         root.innerHTML = "";
 
-        let data = getState()
+        let data = pairs.getState()
           .split("\n")
           .map((row) => row.trim().split(/\s+/));
         root.style.display = "grid";
@@ -117,13 +110,13 @@
               }
 
               evt.preventDefault();
-              let isMismatch = openField(x, y);
+              let isMismatch = pairs.openField(y, x);
               render();
               if (isMismatch) {
                 shouldAbort = true;
                 setTimeout(() => {
                   shouldAbort = false;
-                  closeAll();
+                  pairs.closeFields();
                   render();
                 }, 1000);
               }
@@ -133,7 +126,7 @@
           }
         }
 
-        let points = getPoints();
+        let points = pairs.getPoints();
         let pointsContainer = document.getElementById("points");
         pointsContainer.innerHTML = `Points: ${points}`
       }

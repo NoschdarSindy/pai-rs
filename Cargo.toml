@@ -1,7 +1,11 @@
 [package]
 name = "pairs"
 version = "0.1.0"
-authors = ["Your Name <student@informatik.hu-berlin.de>", "Your Partner <partner@informatik.hu-berlin.de"]
+authors = [
+    "Paul Kantiem <paul.kantiem@.hu-berlin.de>",
+    "Noschdar Sindy <noschdar.sindy@hu-berlin.de>",
+    "Dennis Pidun <dennis.pidun@hu-berlin.de>"
+]
 edition = "2018"
 
 [lib]
@@ -10,7 +14,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 wasm-bindgen = "0.2"
 fastrand = "1.9.0"
-instant = {version="*", features=["wasm-bindgen"]}
+instant = { version = "*", features = ["wasm-bindgen"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

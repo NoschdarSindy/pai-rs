@@ -1,21 +1,19 @@
 #[cfg(test)]
 mod tests {
-    use crate::pairs::{Field, Pairs, Vec2D};
+    use crate::*;
 
     //===Helper===
 
     fn create_pairs(field_size: usize, player_count: usize) -> Pairs {
-        let mut pairs = Pairs::default();
-        pairs.create(player_count, field_size);
-        pairs
+        Pairs::create_grid(player_count, field_size)
     }
 
     fn find_card(field: &Vec2D<Field>, x:  usize, y: usize, matching: bool) -> Option<(usize, usize)> {
-        let given_card = field[x][y].get_symbol();
+        let given_card = field[x][y].symbol;
         for i in 0..field.len() {
             for j in 0..field.len() {
                 let f = &field[i][j];
-                if (matching == (f.get_symbol() == given_card)) && (y != j || x != i) {
+                if (matching == (f.symbol == given_card)) && (y != j || x != i) {
                     return Some((i, j));
                 }
             }
@@ -32,12 +30,12 @@ mod tests {
         let player_count = 2;
         let pairs = create_pairs(field_size, player_count);
 
-        assert_eq!(pairs.get_field_size(), field_size);
+        assert_eq!(pairs.field_size, field_size);
 
-        assert_eq!(*pairs.get_player_points(), vec![0; player_count]);
+        assert_eq!(*pairs.player_points, vec![0; player_count]);
 
-        assert_eq!(pairs.get_field().len(), field_size);
-        assert_eq!(pairs.get_field()[0].len(), field_size);
+        assert_eq!(pairs.field.len(), field_size);
+        assert_eq!(pairs.field.len(), field_size);
     }
 
     // Spieler soll nach Aufdecken zwei gleicher Karten einen Punkt bekommen
@@ -47,14 +45,14 @@ mod tests {
         let player_count = 2;
         let mut pairs = create_pairs(field_size, player_count);
 
-        let (i,j) = find_card(pairs.get_field(), 0,0, true).unwrap();
+        let (i,j) = find_card(&pairs.field, 0,0, true).unwrap();
 
-        pairs.open(0, 0);
-        pairs.open(i, j);
-        assert_eq!(pairs.get_field()[0][0].is_open(), true);
-        assert_eq!(pairs.get_field()[i][j].is_open(), true);
+        pairs.open_field(0, 0);
+        pairs.open_field(i, j);
+        assert_eq!(pairs.field[0][0].open, true);
+        assert_eq!(pairs.field[i][j].open, true);
 
-        assert_eq!(pairs.get_player_points()[pairs.get_active_player()], 1);
+        assert_eq!(pairs.player_points[pairs.active_player], 1);
     }
 
     // Bei Mismatch soll der nächste Spieler drankommen und beide Karten wieder umgedreht werden
@@ -64,19 +62,19 @@ mod tests {
         let player_count = 2;
         let mut pairs = create_pairs(field_size, player_count);
 
-        let (i,j) = find_card(pairs.get_field(), 0,0, false).unwrap();
+        let (i,j) = find_card(&pairs.field, 0,0, false).unwrap();
 
-        pairs.open(0, 0);
-        pairs.open(i, j);
+        pairs.open_field(0, 0);
+        pairs.open_field(i, j);
 
-        assert_eq!(pairs.get_field()[0][0].is_open(), true);
-        assert_eq!(pairs.get_field()[i][j].is_open(), true);
+        assert_eq!(pairs.field[0][0].open, true);
+        assert_eq!(pairs.field[i][j].open, true);
 
-        assert_eq!(pairs.get_active_player(), 1);
+        assert_eq!(pairs.active_player, 1);
 
-        pairs.close_all();
-        assert_eq!(pairs.get_field()[0][0].is_open(), false);
-        assert_eq!(pairs.get_field()[i][j].is_open(), false);
+        pairs.close_fields();
+        assert_eq!(pairs.field[0][0].open, false);
+        assert_eq!(pairs.field[i][j].open, false);
     }
 
     // Aktualisierter Punktestand soll korrekt dargestellt werden
@@ -86,11 +84,11 @@ mod tests {
         let player_count = 3;
         let mut pairs = create_pairs(field_size, player_count);
 
-        let (i,j) = find_card(pairs.get_field(), 0,0, true).unwrap();
+        let (i,j) = find_card(&pairs.field, 0,0, true).unwrap();
 
-        pairs.open(0, 0);
-        pairs.open(i, j);
+        pairs.open_field(0, 0);
+        pairs.open_field(i, j);
 
-        assert_eq!(pairs.player_points_to_str(), "🟥: 1   🟦: 0   🆒: 0   ");
+        assert_eq!(pairs.get_points(), "🟥: 1   🟦: 0   🆒: 0   ");
     }
 }
