@@ -1,3 +1,5 @@
+mod pairs_tests;
+
 use wasm_bindgen::prelude::*;
 
 type Vec2D<T> = Vec<Vec<T>>;
