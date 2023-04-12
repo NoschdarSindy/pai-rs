@@ -10,12 +10,12 @@ mod tests {
         pairs
     }
 
-    fn find_matching_card(field: &Vec2D<Field>, x:  usize, y: usize, matching: bool) -> Option<(usize, usize)> {
-        let card_to_match = field[x][y].get_symbol();
+    fn find_card(field: &Vec2D<Field>, x:  usize, y: usize, matching: bool) -> Option<(usize, usize)> {
+        let given_card = field[x][y].get_symbol();
         for i in 0..field.len() {
             for j in 0..field.len() {
                 let f = &field[i][j];
-                if (matching == (f.get_symbol() == card_to_match)) && (y != j || x != i) {
+                if (matching == (f.get_symbol() == given_card)) && (y != j || x != i) {
                     return Some((i, j));
                 }
             }
@@ -47,7 +47,7 @@ mod tests {
         let player_count = 2;
         let mut pairs = create_pairs(field_size, player_count);
 
-        let (i,j) = find_matching_card(pairs.get_field(), 0,0, true).unwrap();
+        let (i,j) = find_card(pairs.get_field(), 0,0, true).unwrap();
 
         pairs.open(0, 0);
         pairs.open(i, j);
@@ -64,19 +64,19 @@ mod tests {
         let player_count = 2;
         let mut pairs = create_pairs(field_size, player_count);
 
-        let (i,j) = find_matching_card(pairs.get_field(), 0,0, true).unwrap();
+        let (i,j) = find_card(pairs.get_field(), 0,0, false).unwrap();
 
         pairs.open(0, 0);
         pairs.open(i, j);
 
-        assert_eq!(pairs.get_field()[x1][y1].is_open(), true);
-        assert_eq!(pairs.get_field()[x2][y2].is_open(), true);
+        assert_eq!(pairs.get_field()[0][0].is_open(), true);
+        assert_eq!(pairs.get_field()[i][j].is_open(), true);
 
         assert_eq!(pairs.get_active_player(), 1);
 
         pairs.close_all();
-        assert_eq!(pairs.get_field()[x1][y1].is_open(), false);
-        assert_eq!(pairs.get_field()[x2][y2].is_open(), false);
+        assert_eq!(pairs.get_field()[0][0].is_open(), false);
+        assert_eq!(pairs.get_field()[i][j].is_open(), false);
     }
 
     // Aktualisierter Punktestand soll korrekt dargestellt werden
@@ -86,7 +86,7 @@ mod tests {
         let player_count = 3;
         let mut pairs = create_pairs(field_size, player_count);
 
-        let (i,j) = find_matching_card(pairs.get_field(), 0,0, true).unwrap();
+        let (i,j) = find_card(pairs.get_field(), 0,0, true).unwrap();
 
         pairs.open(0, 0);
         pairs.open(i, j);
