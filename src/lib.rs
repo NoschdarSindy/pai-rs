@@ -2,7 +2,7 @@ use wasm_bindgen::prelude::*;
 
 type Vec2D<T> = Vec<Vec<T>>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 struct Vec2<T> {
     x: T,
     y: T,
@@ -12,7 +12,7 @@ type Position = Vec2<usize>;
 
 const PLAYER_COLORS: [char; 8] = ['🟥', '🟦', '🆒', '🟧', '🟪', '🟨', '🟩', '🟫'];
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Default)]
 struct Field {
     symbol: usize,
     open: bool,
@@ -20,7 +20,7 @@ struct Field {
 
 
 #[wasm_bindgen]
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct Pairs {
     open: (Option<Position>, Option<Position>),
     field: Vec2D<Field>,
@@ -37,7 +37,7 @@ impl Pairs {
     }
 
     #[wasm_bindgen(js_name = createGrid)]
-    pub fn create(&mut self, player_count: usize, field_size: usize) {
+    pub fn create_grid(&mut self, player_count: usize, field_size: usize) {
         self.field_size = field_size;
         self.field = Pairs::init_random_field(field_size);
         self.player_points = vec![0; player_count];
@@ -63,7 +63,7 @@ impl Pairs {
     }
 
     #[wasm_bindgen(js_name = openField)]
-    pub fn open(&mut self, x: usize, y: usize) -> bool {
+    pub fn open_field(&mut self, x: usize, y: usize) -> bool {
         let field = &mut self.field[x][y];
 
         field.open = match field.open {
@@ -95,7 +95,7 @@ impl Pairs {
     }
 
     #[wasm_bindgen(js_name = closeFields)]
-    pub fn close_all(&mut self) {
+    pub fn close_fields(&mut self) {
         if let (Some(first), Some(second)) = &self.open {
             self.field[first.x][first.y].open = false;
             self.field[second.x][second.y].open = false;
@@ -104,7 +104,7 @@ impl Pairs {
     }
 
     #[wasm_bindgen(js_name = getPoints)]
-    pub fn get_player_points(&self) -> String {
+    pub fn get_points(&self) -> String {
         let mut final_string = String::new();
         for (index, points) in self.player_points.iter().enumerate() {
             final_string += &format!("{}: {}   ", PLAYER_COLORS[index], points);
