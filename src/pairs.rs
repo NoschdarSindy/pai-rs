@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-type Vec2D<T> = Vec<Vec<T>>;
+pub type Vec2D<T> = Vec<Vec<T>>;
 
 #[derive(Clone, Debug)]
 struct Vec2<T> {
@@ -12,9 +12,19 @@ type Position = Vec2<usize>;
 const PLAYER_COLORS: [char; 8] = ['🟥', '🟦', '🆒', '🟧', '🟪', '🟨', '🟩', '🟫'];
 
 #[derive(Clone, Debug, Default)]
-struct Field {
+pub struct Field {
     symbol: usize,
     open: bool,
+}
+
+impl Field {
+    pub fn is_open(&self) -> bool {
+        self.open
+    }
+
+    pub fn get_symbol(&self) -> usize {
+        self.symbol
+    }
 }
 
 #[derive(Debug, Default)]
@@ -91,12 +101,28 @@ impl Pairs {
         }
     }
 
-    pub fn get_player_points(&self) -> String {
+    pub fn player_points_to_str(&self) -> String {
         let mut final_string = String::new();
         for (index, points) in self.player_points.iter().enumerate() {
             final_string += &format!("{}: {}   ", PLAYER_COLORS[index], points);
         }
         final_string
+    }
+
+    pub fn get_field_size(&self) -> usize {
+        self.field_size
+    }
+
+    pub fn get_field(&self) -> &Vec2D<Field> {
+        &self.field
+    }
+
+    pub fn get_active_player(&self) -> usize {
+        self.active_player
+    }
+
+    pub fn get_player_points(&self) -> &Vec<usize> {
+        &self.player_points
     }
 }
 
