@@ -66,19 +66,19 @@
 
       await init();
 
-      let pairs = new Pairs();
-
       let shouldAbort = false;
+      let pairs;
 
       function start() {
         render();
       }
 
+
       document.getElementById("startBtn").addEventListener("click", (e) => {
         e.preventDefault();
         let nPlayers = document.getElementById("nPlayers").value;
         let fieldSize = document.getElementById("fieldSize").value;
-        pairs.createGrid(parseInt(nPlayers), parseInt(fieldSize));
+        pairs = new Pairs(parseInt(nPlayers), parseInt(fieldSize));
         start();
       })
 

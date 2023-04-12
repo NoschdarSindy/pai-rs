@@ -3,12 +3,10 @@ use wasm_bindgen::prelude::*;
 type Vec2D<T> = Vec<Vec<T>>;
 
 #[derive(Clone)]
-struct Vec2<T> {
-    x: T,
-    y: T,
+struct Position {
+    x: usize,
+    y: usize,
 }
-
-type Position = Vec2<usize>;
 
 const PLAYER_COLORS: [char; 8] = ['🟥', '🟦', '🆒', '🟧', '🟪', '🟨', '🟩', '🟫'];
 
@@ -31,16 +29,14 @@ pub struct Pairs {
 
 #[wasm_bindgen]
 impl Pairs {
-    #[wasm_bindgen(constructor)]
-    pub fn new() -> Self {
-        Self::default()
-    }
 
-    #[wasm_bindgen(js_name = createGrid)]
-    pub fn create_grid(&mut self, player_count: usize, field_size: usize) {
-        self.field_size = field_size;
-        self.field = Pairs::init_random_field(field_size);
-        self.player_points = vec![0; player_count];
+    #[wasm_bindgen(constructor)]
+    pub fn create_grid(player_count: usize, field_size: usize) -> Self {
+        let mut pairs = Self::default();
+        pairs.field_size = field_size;
+        pairs.field = Pairs::init_random_field(field_size);
+        pairs.player_points = vec![0; player_count];
+        pairs
     }
 
     fn init_random_field(field_size: usize) -> Vec2D<Field> {
@@ -86,7 +82,7 @@ impl Pairs {
                 }
             }
             (Some(_), Some(_)) => {
-                self.close_all();
+                self.close_fields();
                 self.open.0 = Some(Position { x, y });
             }
             _ => {}
